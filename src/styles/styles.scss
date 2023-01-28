@@ -1,0 +1,123 @@
+@import "./color.scss";
+@import "./fonts.scss";
+
+body{
+    padding: 0px;
+    margin: 0px;
+}
+
+p{
+    font-family: $quicksand;
+    color:$text
+}
+
+h1{
+    @include bold;
+
+}
+
+main{
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2em;
+}
+
+aside{
+    padding:0.5em;
+    display:flex;
+    justify-content: space-evenly;
+}
+
+//!ELEMENTS
+
+table{
+    width: 75%;
+    text-align: center;
+    th{
+        @include regular;
+    }
+    tr{
+        gap: 2em;
+        td{
+            @include light;
+        }
+
+    }
+}
+
+.container{
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap:1em
+}
+
+input{
+    border: none;
+    background-color: $babyBlue;
+    outline: none;
+    border-radius: 10px;
+    padding:1em;
+    width: 100%;
+    box-sizing: border-box;
+    @include regular
+}
+
+button{
+    border:none;
+    border-radius: 10px;
+    padding:1em 2em;
+    @include bold;
+    background-color: $salmon;
+    color:white;
+    &:hover{
+        opacity:0.5;
+        cursor: pointer;
+    }
+}
+
+form{
+    p{ &:hover{cursor: pointer}}
+}
+
+//! CLASS
+
+.menuText{
+    @include bold;
+    color:$text;
+    text-decoration: none;
+    &:hover{
+        opacity:0.7;
+        transform: scale(1.2);
+        transition: 1s;
+    }
+}
+
+.formAddToDo{
+    width: 100%;
+    display:flex;
+    margin: 2em 0em;
+    gap:1em
+}
+
+.mainContainer{
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 75%;
+    gap:1em;
+}
+
+.loginContainer{
+    text-align: center;
+    width: 50%;
+    form{
+        display:flex;
+        flex-direction: column;
+        gap:1em;
+        box-sizing: border-box;
+    }
+}
