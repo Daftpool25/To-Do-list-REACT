@@ -1,78 +1,91 @@
-import React, { createContext, useReducer, useState }  from 'react';
+import React, { createContext, useEffect, useReducer, useState }  from 'react';
 import {Route, Routes, BrowserRouter, Link} from "react-router-dom"
 import Login from './components/login';
 import Main from './components/main';
 import { types } from './utils/actions';
 import  "./styles/styles.scss"
 import Register from './components/register';
+import { deleteData, getData, postData } from './controllers/general.controller';
 
-
-// creo el estado inicial (no lo uso en este caso por ahora)
-const initialState= {
-        userName:"Daftpool",
-        authState:true}
 
 
 // creo el contexto
  export const authContext= React.createContext(null)
- let idCounter=0
-
-
 
 
 
 function App() {
 
-   //const [authState, setAuthState] = useState(initialState)
+    function dispatchReRender(item){
+        dispatch({
+            type:types.RENDER,
+            payload:{
+                data:item
+        }})
+    }
 
-
-//!use Reduce
-
-    //?initial state
-    const listInitalState={list:[],loginState:{user:null, auth:false}};
-
-    //?Reducer (is same way: state, action)pero no se hace el state=initaState
+    //!REDUCER
     const reducer = (state,action) =>{
-
-        //Aqui es action.type xq no me busca directamente el valor de action
-        //si no que lo setea cuando pongo el type y el payload
         switch (action.type) {
 
-            case types.ADD_TODO:
-                
+            case types.RENDER:
                 return{
-                    ...state,
-                    list:[...state.list,{
-                        id: action.payload.id,
-                        text:action.payload.text,
-                        state:false
-                    }]
-                }
-            case types.TOOGLE_TODO:
+                    ...state,list:action.payload.data
+            }
 
+
+            case types.ADD_TODO:
+                postData("List", {text:action.payload.text, priority:1}).
+                then( item => getData("List").then( item => dispatchReRender(item)
+                ))
+                return{...state}
+
+
+            case types.TOOGLE_TODO:
                 return {...state, list:state.list.map( item => (item.id===action.payload.id)? {...item,state:!item.state}:item)}
            
-            case types.LOGIN:
 
+
+            case types.DELETE_TODO:
+                 deleteData(`List/${action.payload.id}`).
+                 then( item=> getData("List").then(item => dispatchReRender(item))                    )
+                 
+                return{ ...state}
+
+
+
+            case types.LOGIN:
                 return{
                     ...state,loginState:{user:action.payload.user, auth:true}
                 }
 
             default:
-                return state;
+                return {...state};
         }
     }
 
+//!use Reduce
 
-    //? Asign useReducer to State and dispatch actions
-                                        //reducer //initialState
+
+    //!initial state
+    const listInitalState={list:[],loginState:{user:null, auth:false}};
+
+    useEffect( () => {
+
+        getData("List").then( item =>
+            
+            dispatch({
+            type:"RENDER",
+            payload:{
+                data:item
+            }
+        }))
+
+    }, [])
+
     const [state, dispatch] = useReducer(reducer,listInitalState)
 
 
-
-
-
-   //hago el provider
   return (
     <authContext.Provider value={state}>
         <BrowserRouter>
@@ -107,13 +120,19 @@ function App() {
                                 type:types.ADD_TODO,
                                 payload:{
                                     text:text,
-                                    id:idCounter++
                                 }
                             })}
 
                             
                             onClickState={(id) => dispatch({
                                 type: types.TOOGLE_TODO,
+                                payload:{
+                                    id:id
+                                }
+                            })}
+
+                            onClickDelete={(id) => dispatch({
+                                type:types.DELETE_TODO,
                                 payload:{
                                     id:id
                                 }

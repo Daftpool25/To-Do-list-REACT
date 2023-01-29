@@ -82,6 +82,10 @@ form{
     p{ &:hover{cursor: pointer}}
 }
 
+td{img{opacity: 0.3; &:hover{cursor: pointer;}}}
+
+tr{ padding:1.5em 0em}
+
 //! CLASS
 
 .menuText{
