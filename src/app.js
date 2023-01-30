@@ -6,6 +6,7 @@ import { types } from './utils/actions';
 import  "./styles/styles.scss"
 import Register from './components/register';
 import { deleteData, getData, postData } from './controllers/general.controller';
+import { loginUser, registerUser } from './controllers/users.controller';
 
 
 
@@ -24,13 +25,23 @@ function App() {
         }})
     }
 
+    function setUser(email,userName){
+        dispatch({
+            type:types.SET_USER,
+            payload:{
+                email,
+                userName,
+                auth:true
+        }})
+    }
+
     //!REDUCER
     const reducer = (state,action) =>{
         switch (action.type) {
 
             case types.RENDER:
                 return{
-                    ...state,list:action.payload.data
+                    ...state,list:action.payload.data,listPure:action.payload.data
             }
 
 
@@ -53,11 +64,39 @@ function App() {
                 return{ ...state}
 
 
+            case types.SET_USER:
+                return {...state,loginState:{email:action.payload.email, userName:action.payload.userName, auth:action.payload.auth}}
+
+
 
             case types.LOGIN:
-                return{
-                    ...state,loginState:{user:action.payload.user, auth:true}
-                }
+                loginUser({email:action.payload.email,password:action.payload.password}).
+                then(
+                    item =>{ setUser(item.email, item.userName)}
+                )
+
+                return{...state}
+
+            case types.REGISTER:
+                const {userName,email,password}=action.payload
+                registerUser({userName,email,password}).then(
+                    item => setUser(item.email,item.userName)
+                ).catch(error => alert(error))
+
+                return {...state}
+
+            case "SHOW_ALL":
+                
+                return {...state,list:state.listPure};
+
+            case "COMPLETED":
+                //!work every time whith state, you dont work with initalState
+                const completed=state.listPure.filter( item => item.state)
+                return {...state,list:completed};
+
+            case "ACTIVE":
+                const active=state.listPure.filter( item => !item.state)
+                return {...state,list:active};
 
             default:
                 return {...state};
@@ -68,14 +107,14 @@ function App() {
 
 
     //!initial state
-    const listInitalState={list:[],loginState:{user:null, auth:false}};
+    const listInitalState={list:[],listPure:[],loginState:{email:null, userName:null, auth:false}};
 
     useEffect( () => {
 
         getData("List").then( item =>
             
             dispatch({
-            type:"RENDER",
+            type:types.RENDER,
             payload:{
                 data:item
             }
@@ -99,10 +138,11 @@ function App() {
                     <Routes>
                         <Route element={<Login
                             submit={
-                                (user, password) => dispatch({
+                                (email, password) => dispatch({
                                     type:types.LOGIN,
                                     payload:{
-                                        user:user
+                                        email,
+                                        password
                                     }
                                 })
                             }
@@ -110,6 +150,16 @@ function App() {
 
 
                         <Route element={<Register
+
+                            register={
+                                (userName,email,password) =>
+                                dispatch({
+                                    type:types.REGISTER,
+                                    payload:{
+                                        userName,email,password
+                                    }
+                                })
+                            }
 
                         />} path="/register"/>
 
@@ -119,7 +169,7 @@ function App() {
                             submit={(text) => dispatch({
                                 type:types.ADD_TODO,
                                 payload:{
-                                    text:text,
+                                    text
                                 }
                             })}
 
@@ -127,16 +177,39 @@ function App() {
                             onClickState={(id) => dispatch({
                                 type: types.TOOGLE_TODO,
                                 payload:{
-                                    id:id
+                                    id
                                 }
                             })}
 
                             onClickDelete={(id) => dispatch({
                                 type:types.DELETE_TODO,
                                 payload:{
-                                    id:id
+                                    id
                                 }
                             })}
+
+                            //filter
+
+                            completed={
+                                () => dispatch({
+                                    type:"COMPLETED",
+                                    payload:{}
+                                })
+                            }
+
+                            active={
+                                () => dispatch({
+                                    type:"ACTIVE",
+                                    payload:{}
+                                })
+                            }
+
+                            showAll={
+                                () => dispatch({
+                                    type:"SHOW_ALL",
+                                    payload:{}
+                                })
+                            }
 
                         />} path="/" exact/>
                     </Routes>

@@ -7,7 +7,7 @@ function Login({submit}) {
     //creo mi consumer y le paso el nombre del contexto creado
     const context =useContext(authContext)
 
-    const userName=useRef();
+    const email=useRef();
     const password=useRef();
     const navigate=useNavigate()
 
@@ -17,9 +17,9 @@ function Login({submit}) {
         <h1>Login</h1>
         <form onSubmit={
             e => {e.preventDefault();
-            submit(userName.current.value,password.current.value)}
+            submit(email.current.value,password.current.value)}
         }>
-            <input ref={userName} type="text" placeholder='User'/>
+            <input ref={email} type="email" placeholder='example@emil.com'/>
             <input ref={password} type="text" placeholder='Password'/>
             <button type='submit'>Login</button>
             <p onClick={()=> navigate("/register")}>Or Register...</p>
