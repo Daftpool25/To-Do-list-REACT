@@ -144,3 +144,7 @@ tr{ padding:1.5em 0em}
         box-sizing: border-box;
     }
 }
+
+.toast{
+    @include regular;
+}

@@ -1,4 +1,5 @@
 //TODO jwt, passsword managment, routes gestion,class filter, toasts
+import {toast} from "react-hot-toast"
 
 export function loginUser (element){
     return fetch("http://localhost:2000/users",{
@@ -6,16 +7,15 @@ export function loginUser (element){
         body:JSON.stringify(element),
         headers: {"Content-type": "application/json; charset=UTF-8"}
     }
-    ).then(response => {
-        if(response.status!==200){
-            alert(response.statusText)
-            return;
-        }else{
-           return response.json()
+    ).then(response => response.json()
+    ).then(item => {
+        if(item.message){
+            toast.error(item.message);
+            return
         }
-    }
-    ).then(item => item).
-    catch(error => alert(error.message))
+        return item;
+    }).
+    catch(error => toast.error(error.message))
 }
 
 export function registerUser (element){
@@ -23,8 +23,13 @@ export function registerUser (element){
         method:"POST",
         body:JSON.stringify(element),
         headers: {"Content-type": "application/json; charset=UTF-8"}
-    }).then(
-        response => response.json()
-    ).then(item => item).
-    catch(error => alert(error))
+    }).then(response => response.json()
+    ).then(item => {
+        if(item.message){
+            toast.error(item.message)
+            return;
+        }
+       return item;
+    }).
+    catch(error => alert(error.message))
 }

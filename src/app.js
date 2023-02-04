@@ -8,13 +8,14 @@ import Register from './components/register';
 import { deleteData, getData, postData } from './controllers/general.controller';
 import { loginUser, registerUser } from './controllers/users.controller';
 import { storage } from './utils/storage';
+import toast, { Toaster } from 'react-hot-toast';
 
 
 
 // creo el contexto
  export const authContext= React.createContext(null)
 
-//TODO TOKEN, REDIRECT,USER, toasts, quitar passsword return
+//TODO handle errors
 
 function App() {
 
@@ -49,8 +50,10 @@ function App() {
 
             case types.ADD_TODO:
                 postData("List", {text:action.payload.text, priority:1}).
-                then( item => getData("List").then( item => dispatchReRender(item)
+                then( item => getData("List").then( item => {dispatchReRender(item);
+                     toast.success("Success")}
                 ))
+                
                 return{...state}
 
 
@@ -61,13 +64,16 @@ function App() {
 
             case types.DELETE_TODO:
                  deleteData(`List/${action.payload.id}`).
-                 then( item=> getData("List").then(item => dispatchReRender(item))                    )
+                 then( item=> getData("List").then(item => {dispatchReRender(item); 
+                    toast.success("Success")})
+                )
                  
                 return{ ...state}
 
 
             case types.SET_USER:
-                storage.setItem("token",action.payload.token)
+                storage.setItem("token",action.payload.token);
+                toast.success("Wellcome!")
                 return {...state,loginState:{email:action.payload.email, userName:action.payload.userName, auth:action.payload.auth, token:action.payload.token}}
 
 
@@ -81,15 +87,16 @@ function App() {
                 return{...state}
 
             case types.REGISTER:
-                const {userName,email,password}=action.payload
+                const {userName,email,password}=action.payload;
                 registerUser({userName,email,password}).then(
-                    item => setUser(item.email,item.userName)
-                ).catch(error => alert(error))
+                    item => setUser(item.user.email, item.user.userName,item.token)
+                )
 
                 return {...state}
 
             case types.LOGOUT:
                 storage.clear()
+                toast.success("Bye")
                 return {...state,loginState:{email:null, userName:null,token:null, auth:false}};
 
             case "SHOW_ALL":
@@ -151,6 +158,10 @@ function App() {
                 <Link className="menuText" to="/">Main</Link>
             </aside>
             <main>
+                <Toaster toastOptions={{
+                    className:'toast',
+                    duration:8000
+                }}/>
                     <Routes>
                         <Route element={
 

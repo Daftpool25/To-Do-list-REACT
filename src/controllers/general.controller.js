@@ -1,8 +1,10 @@
+import {toast} from "react-hot-toast"
+
 export const getData = async(location) =>{
     return await fetch(`http://localhost:2000/${location}`).then(
         response => response.json()
     ).then(json => json)
-    .catch(error => alert(error))
+    .catch(error => toast.error(error))
 }
 
 export const postData = async (location,bodyContent) =>{
@@ -14,7 +16,7 @@ export const postData = async (location,bodyContent) =>{
     }).then(
         response => response.json()
     ).then(json => console.log(json))
-    .catch(error => alert(error))
+    .catch(error => toast.error(error))
 }
 
 export const editData = (location,bodyContent) =>{
@@ -26,7 +28,7 @@ export const editData = (location,bodyContent) =>{
     }).then(
         response => response.json()
     ).then(json => console.log(json))
-    .catch(error => alert(error))
+    .catch(error => toast.error(error))
 }
 
 export const deleteData = async (location) =>{
@@ -35,5 +37,5 @@ export const deleteData = async (location) =>{
     }).then(
         response => console.log(response)
     )
-    .catch(error => alert(error))
+    .catch(error => toast.error(error))
 }
