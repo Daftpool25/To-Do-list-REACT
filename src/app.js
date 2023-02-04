@@ -7,13 +7,14 @@ import  "./styles/styles.scss"
 import Register from './components/register';
 import { deleteData, getData, postData } from './controllers/general.controller';
 import { loginUser, registerUser } from './controllers/users.controller';
+import { storage } from './utils/storage';
 
 
 
 // creo el contexto
  export const authContext= React.createContext(null)
 
-
+//TODO TOKEN, REDIRECT,USER, toasts, quitar passsword return
 
 function App() {
 
@@ -25,13 +26,14 @@ function App() {
         }})
     }
 
-    function setUser(email,userName){
+    function setUser(email,userName,token){
         dispatch({
             type:types.SET_USER,
             payload:{
                 email,
                 userName,
-                auth:true
+                auth:true,
+                token
         }})
     }
 
@@ -65,14 +67,15 @@ function App() {
 
 
             case types.SET_USER:
-                return {...state,loginState:{email:action.payload.email, userName:action.payload.userName, auth:action.payload.auth}}
+                storage.setItem("token",action.payload.token)
+                return {...state,loginState:{email:action.payload.email, userName:action.payload.userName, auth:action.payload.auth, token:action.payload.token}}
 
 
 
             case types.LOGIN:
                 loginUser({email:action.payload.email,password:action.payload.password}).
                 then(
-                    item =>{ setUser(item.email, item.userName)}
+                    item =>{ setUser(item.user.email, item.user.userName,item.token)}
                 )
 
                 return{...state}
@@ -84,6 +87,10 @@ function App() {
                 ).catch(error => alert(error))
 
                 return {...state}
+
+            case types.LOGOUT:
+                storage.clear()
+                return {...state,loginState:{email:null, userName:null,token:null, auth:false}};
 
             case "SHOW_ALL":
                 
@@ -107,7 +114,7 @@ function App() {
 
 
     //!initial state
-    const listInitalState={list:[],listPure:[],loginState:{email:null, userName:null, auth:false}};
+    const listInitalState={list:[],listPure:[],loginState:{email:null, userName:null,token:null, auth:false}};
 
     useEffect( () => {
 
@@ -131,41 +138,26 @@ function App() {
 
         <div>
             <aside>
-                <Link className="menuText" to="login">Login</Link>
+                <Link className="menuText" to="login" onClick={
+                    state.loginState.auth?
+                    () => dispatch({
+                        type:types.LOGOUT,
+                        payload:{}
+                    })
+                    :
+                    () => alert("You already are here")
+                }>{state.loginState.auth? "logout":"login"}</Link>
+
                 <Link className="menuText" to="/">Main</Link>
             </aside>
             <main>
                     <Routes>
-                        <Route element={<Login
-                            submit={
-                                (email, password) => dispatch({
-                                    type:types.LOGIN,
-                                    payload:{
-                                        email,
-                                        password
-                                    }
-                                })
-                            }
-                        />} path="/login"/>
+                        <Route element={
 
+                            state.loginState.auth?
 
-                        <Route element={<Register
-
-                            register={
-                                (userName,email,password) =>
-                                dispatch({
-                                    type:types.REGISTER,
-                                    payload:{
-                                        userName,email,password
-                                    }
-                                })
-                            }
-
-                        />} path="/register"/>
-
-                        
-                        <Route element={<Main 
-                        
+                            <Main
+                                                    
                             submit={(text) => dispatch({
                                 type:types.ADD_TODO,
                                 payload:{
@@ -210,8 +202,152 @@ function App() {
                                     payload:{}
                                 })
                             }
+                            />
+                            :                        
+                            <Login
+                                submit={
+                                    (email, password) => dispatch({
+                                        type:types.LOGIN,
+                                        payload:{
+                                            email,
+                                            password
+                                        }
+                                    })
+                                }
+                            />
+                        } path="/login"/>
 
-                        />} path="/" exact/>
+
+                        <Route element={
+
+                            state.loginState.auth?                            
+                            <Main
+                                                    
+                            submit={(text) => dispatch({
+                                type:types.ADD_TODO,
+                                payload:{
+                                    text
+                                }
+                            })}
+
+                            
+                            onClickState={(id) => dispatch({
+                                type: types.TOOGLE_TODO,
+                                payload:{
+                                    id
+                                }
+                            })}
+
+                            onClickDelete={(id) => dispatch({
+                                type:types.DELETE_TODO,
+                                payload:{
+                                    id
+                                }
+                            })}
+
+                            //filter
+
+                            completed={
+                                () => dispatch({
+                                    type:"COMPLETED",
+                                    payload:{}
+                                })
+                            }
+
+                            active={
+                                () => dispatch({
+                                    type:"ACTIVE",
+                                    payload:{}
+                                })
+                            }
+
+                            showAll={
+                                () => dispatch({
+                                    type:"SHOW_ALL",
+                                    payload:{}
+                                })
+                            }
+                            />
+                            :   
+                            <Register
+                                register={
+                                    (userName,email,password) =>
+                                    dispatch({
+                                        type:types.REGISTER,
+                                        payload:{
+                                            userName,email,password
+                                        }
+                                    })
+                                }
+
+                            />
+                        } path="/register"/>
+
+                        
+                        <Route element={
+                            state.loginState.auth?
+                            
+                            <Main 
+                        
+                                submit={(text) => dispatch({
+                                    type:types.ADD_TODO,
+                                    payload:{
+                                        text
+                                    }
+                                })}
+
+                                
+                                onClickState={(id) => dispatch({
+                                    type: types.TOOGLE_TODO,
+                                    payload:{
+                                        id
+                                    }
+                                })}
+
+                                onClickDelete={(id) => dispatch({
+                                    type:types.DELETE_TODO,
+                                    payload:{
+                                        id
+                                    }
+                                })}
+
+                                //filter
+
+                                completed={
+                                    () => dispatch({
+                                        type:"COMPLETED",
+                                        payload:{}
+                                    })
+                                }
+
+                                active={
+                                    () => dispatch({
+                                        type:"ACTIVE",
+                                        payload:{}
+                                    })
+                                }
+
+                                showAll={
+                                    () => dispatch({
+                                        type:"SHOW_ALL",
+                                        payload:{}
+                                    })
+                                }
+                            />
+                            :
+                            <Login
+                             submit={
+                                    (email, password) => dispatch({
+                                        type:types.LOGIN,
+                                        payload:{
+                                            email,
+                                            password
+                                        }
+                                    })
+                                }
+                            />
+
+                    } path="/" exact/>
                     </Routes>
             </main>
         </div>

@@ -9,5 +9,6 @@ export const types={
      SET_USER:"SET_USER",
      LOGIN:"LOGIN",
      REGISTER:"REGISTER",
+     LOGOUT:"LOGOUT",
      SET_VISIBILITY_FILTER:"SET_VISIBILITY_FILTER"
 } 
